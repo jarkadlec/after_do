@@ -46,7 +46,7 @@ describe AfterDo do
 
     it 'marks the copied method as private' do
       @dummy_class.send callback_adder,  :zero do end
-      copied_method_name = (AfterDo::Base::ALIAS_PREFIX + 'zero').to_sym
+      copied_method_name = (AfterDo::Class::ALIAS_PREFIX + 'zero').to_sym
       dummy_instance.respond_to?(copied_method_name).should be_false
     end
 
@@ -231,16 +231,23 @@ describe AfterDo do
         end
       end
 
+      def redefine_bare_class
+        @bare_class = Class.new
+      end
+
       before :each do
         redefine_dummy_module
-        @dummy_class.send(:include, @dummy_module)
+        redefine_bare_class
+        @bare_class.send(:include, @dummy_module)
         @dummy_module.extend AfterDo
         @dummy_module.send callback_adder, :module_method do mockie.call end
       end
 
+      let(:bare_instance) {@bare_class.new}
+
       it 'executes callbacks from methods of included modules' do
         mockie.should_receive :call
-        dummy_instance.module_method
+        bare_instance.module_method
       end
     end
   end
